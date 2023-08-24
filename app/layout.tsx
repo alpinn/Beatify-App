@@ -2,10 +2,12 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Figtree } from 'next/font/google'
 
+import Sidebar from '@/components/Sidebar'
+
 const font = Figtree({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Welcome to Spotify',
+  title: 'Welcome to Beatify',
   description: 'Listen to music free!',
 }
 
@@ -17,7 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={font.className}>
-        {children}</body>
+        <Sidebar>
+          {children}
+        </Sidebar>
+        </body>
     </html>
   )
 }
