@@ -5,22 +5,38 @@ import { twMerge } from "tailwind-merge";
 import {RxCaretLeft, RxCaretRight} from "react-icons/rx";
 import { HiHome } from "react-icons/hi";
 import { BiSearch } from "react-icons/bi";
+import { FaUserAlt } from "react-icons/fa";
+import useAuthModal from "@/hooks/useAuthModal";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
+import { toast } from "react-hot-toast";
 import Button from "./Button";
+import { useUser } from "@/hooks/useUser";
 
 interface HeaderProps {
     children: React.ReactNode;
     className?: string;
 }
 
-const Header: React.FC<HeaderProps>  = ({
+const Header: React.FC<HeaderProps> = ({
     children,
     className
 }) => {
+    const authModal = useAuthModal();
     const router = useRouter();
 
-    const handleLogout = () => {
-        //Handle Logout Later
+    const supabaseClient = useSupabaseClient();
+    const { user } = useUser();    
+
+    const handleLogout = async () => {
+        const { error } = await supabaseClient.auth.signOut();
+
+        router.refresh();
+        if (error) {
+            toast.error(error.message);
+        } else {
+            toast.success('Logged out!');
+        }
     }
 
     return ( 
@@ -73,7 +89,7 @@ const Header: React.FC<HeaderProps>  = ({
                         transition
                     "
                 >
-                    <RxCaretRight clasName="text-white" size={35}/>
+                    <RxCaretRight className="text-white" size={35}/>
                 </button>
             </div>
             <div className="flex md:hidden gap-x-2 items-center">
@@ -114,32 +130,49 @@ const Header: React.FC<HeaderProps>  = ({
                     gap-x-4
                 "
             >
-                <>
-                    <div>
+                {user ? (
+                    <div className="flex gap-4 items-center">
                         <Button
-                            onClick={() => {}}
-                            className="
-                                bg-transparent
-                                text-neutral-300
-                                font-medium
-                            "
+                            onClick={handleLogout}
+                            className="bg-white px-6 py-2"
                         >
-                            Sign Up
+                            Logout
+                        </Button>
+                        <Button
+                            onClick={() => router.push('/account')}
+                            className="bg-white"
+                        >
+                            <FaUserAlt/>
                         </Button>
                     </div>
-                    <div>
-                        <Button
-                            onClick={() => {}}
-                            className="
-                                bg-white
-                                px-6
-                                py-2
-                            "
-                        >
-                            Log in
-                        </Button>
-                    </div>
-                </>
+                ) : (
+                    <>
+                        <div>
+                            <Button
+                                onClick={authModal.onOpen}
+                                className="
+                                    bg-transparent
+                                    text-neutral-300
+                                    font-medium
+                                "
+                            >
+                                Sign Up
+                            </Button>
+                        </div>
+                        <div>
+                            <Button
+                                onClick={authModal.onOpen}
+                                className="
+                                    bg-white
+                                    px-6
+                                    py-2
+                                "
+                            >
+                                Log in
+                            </Button>
+                        </div>
+                    </>
+                )}
             </div>
            </div>
            {children}
